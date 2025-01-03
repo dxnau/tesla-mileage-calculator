@@ -97,19 +97,26 @@ export const SetupScreen = ({ onComplete }: SetupScreenProps) => {
               type="number"
               value={mileageInput}
               onChange={(e) => {
-                const sanitizedValue = e.target.value.replace(/[^0-9]/g, "");
-                const numValue = parseInt(sanitizedValue);
-                if (!isNaN(numValue) && numValue >= 0 && numValue <= 100000) {
-                  setMileageInput(sanitizedValue);
+                const value = e.target.value;
+                if (
+                  // Allow for deletion of entire field
+                  !value ||
+                  (parseInt(value) >= 0 && parseInt(value) <= 999999)
+                ) {
+                  setMileageInput(value);
+                }
+              }}
+              onBlur={(e) => {
+                if (!e.target.value) {
+                  setMileageInput("0");
                 }
               }}
               onPaste={(e) => {
                 e.preventDefault();
                 const pastedText = e.clipboardData.getData("text");
-                const sanitizedValue = pastedText.replace(/[^0-9]/g, "");
-                const numValue = parseInt(sanitizedValue);
+                const numValue = parseInt(pastedText);
                 if (!isNaN(numValue) && numValue >= 0 && numValue <= 100000) {
-                  setMileageInput(sanitizedValue);
+                  setMileageInput(pastedText);
                 }
               }}
               InputProps={{
@@ -124,19 +131,25 @@ export const SetupScreen = ({ onComplete }: SetupScreenProps) => {
               type="number"
               value={currentMileageInput}
               onChange={(e) => {
-                const sanitizedValue = e.target.value.replace(/[^0-9]/g, "");
-                const numValue = parseInt(sanitizedValue);
-                if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
-                  setCurrentMileageInput(sanitizedValue);
+                const value = e.target.value;
+                if (
+                  !value ||
+                  (parseInt(value) >= 0 && parseInt(value) <= 999999)
+                ) {
+                  setCurrentMileageInput(value);
+                }
+              }}
+              onBlur={(e) => {
+                if (!e.target.value) {
+                  setCurrentMileageInput("0");
                 }
               }}
               onPaste={(e) => {
                 e.preventDefault();
                 const pastedText = e.clipboardData.getData("text");
-                const sanitizedValue = pastedText.replace(/[^0-9]/g, "");
-                const numValue = parseInt(sanitizedValue);
+                const numValue = parseInt(pastedText);
                 if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
-                  setCurrentMileageInput(sanitizedValue);
+                  setCurrentMileageInput(pastedText);
                 }
               }}
               InputProps={{
