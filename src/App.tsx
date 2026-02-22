@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { ThemeProvider, createTheme, Typography } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LeaseProvider } from "./context/LeaseProvider";
 import { CalculatorView } from "./views/CalculatorView";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -107,8 +109,8 @@ function App() {
       <Box
         sx={{
           position: "fixed",
-          top: 16,
-          right: 16,
+          top: { xs: 8, sm: 16 },
+          right: { xs: 8, sm: 16 },
           zIndex: 1000,
           display: "flex",
           gap: 1,
@@ -117,7 +119,10 @@ function App() {
         <IconButton
           onClick={() => setInfoOpen(true)}
           color="inherit"
+          aria-label="About this app"
           sx={{
+            minWidth: 44,
+            minHeight: 44,
             bgcolor:
               mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
             "&:hover": {
@@ -131,7 +136,10 @@ function App() {
         <IconButton
           onClick={toggleColorMode}
           color="inherit"
+          aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           sx={{
+            minWidth: 44,
+            minHeight: 44,
             bgcolor:
               mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
             "&:hover": {
@@ -158,7 +166,7 @@ function App() {
         <DialogTitle>About Tesla Mileage Tracker</DialogTitle>
         <DialogContent>
           <Typography paragraph sx={{ mt: 1 }}>
-            This calculator helps Tesla lease owners track their mileage usage
+            Tesla Mileage Tracker helps Tesla lease owners monitor their mileage usage
             and ensure they stay within their lease limits.
           </Typography>
           <Typography paragraph>Enter your lease details including:</Typography>
@@ -169,10 +177,10 @@ function App() {
             <br />• Current odometer reading
           </Typography>
           <Typography paragraph sx={{ mt: 2 }}>
-            The calculator will show you:
+            The tracker will show you:
           </Typography>
           <Typography component="div" sx={{ pl: 2 }}>
-            • Days of ownership
+            • Days since lease start
             <br />
             • Daily mileage statistics
             <br />• How many miles you're over or under your allowance
@@ -185,9 +193,16 @@ function App() {
 
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <LeaseProvider>
-          <CalculatorView />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<CalculatorView />} />
+              <Route path="/results" element={<CalculatorView />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
         </LeaseProvider>
       </LocalizationProvider>
+      <SpeedInsights />
     </ThemeProvider>
   );
 }
