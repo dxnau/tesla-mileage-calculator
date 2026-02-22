@@ -1,25 +1,35 @@
+import { useEffect, useRef } from "react";
 import { Box, Container, Typography, Card, CardContent } from "@mui/material";
 import { useLease } from "../hooks/useLease";
 import { IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
+const DAYS_PER_YEAR = 365;
+
 export const CalculationResults = ({ onBack }: { onBack: () => void }) => {
   const { leaseStartDate, annualMileage, currentMileage, includeToday } =
     useLease();
 
-  const daysSinceLeaseStart = () => {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+
+  const daysSinceLeaseStart = (): number => {
     if (!leaseStartDate) return 0;
     const today = new Date();
     const days = Math.ceil(
       (today.getTime() - leaseStartDate.getTime()) / (1000 * 3600 * 24)
     );
-    return includeToday ? days : days - 1;
+    const result = includeToday ? days : days - 1;
+    return Math.max(result, 0);
   };
 
-  const allotedDailyMileage = annualMileage / 365;
-  const currentDailyMileage = currentMileage / daysSinceLeaseStart() || 0;
-  const milesOverUnder =
-    currentMileage - daysSinceLeaseStart() * allotedDailyMileage;
+  const days = daysSinceLeaseStart();
+  const allottedDailyMileage = annualMileage / DAYS_PER_YEAR;
+  const currentDailyMileage = days > 0 ? currentMileage / days : 0;
+  const milesOverUnder = currentMileage - days * allottedDailyMileage;
 
   return (
     <Box
@@ -35,27 +45,38 @@ export const CalculationResults = ({ onBack }: { onBack: () => void }) => {
     >
       <IconButton
         onClick={onBack}
+        aria-label="Go back to setup"
         sx={{
           position: "absolute",
           top: 16,
           left: 16,
+          minWidth: 44,
+          minHeight: 44,
         }}
       >
         <ArrowBackIcon />
       </IconButton>
       <Container maxWidth="sm">
         <Box sx={{ p: 3 }}>
-          <Typography variant="h4" align="center" color="primary" gutterBottom>
+          <Typography
+            ref={headingRef}
+            tabIndex={-1}
+            variant="h4"
+            align="center"
+            color="primary"
+            gutterBottom
+            sx={{ outline: "none" }}
+          >
             Your Mileage Summary
           </Typography>
 
           <Card sx={{ mt: 3, mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Days of Ownership
+                Days Since Lease Start
               </Typography>
               <Typography variant="h4" align="center">
-                {daysSinceLeaseStart()} days
+                {days} days
               </Typography>
             </CardContent>
           </Card>
@@ -66,10 +87,10 @@ export const CalculationResults = ({ onBack }: { onBack: () => void }) => {
                 Daily Mileage Stats
               </Typography>
               <Typography>
-                Alloted: {allotedDailyMileage.toFixed(2)} mi/day
+                Allotted: {Math.round(allottedDailyMileage)} mi/day
               </Typography>
               <Typography>
-                Current: {currentDailyMileage.toFixed(2)} mi/day
+                Current: {Math.round(currentDailyMileage)} mi/day
               </Typography>
             </CardContent>
           </Card>
@@ -80,7 +101,7 @@ export const CalculationResults = ({ onBack }: { onBack: () => void }) => {
                 Mileage Summary
               </Typography>
               <Typography variant="h5" align="center" color="primary">
-                {Math.abs(milesOverUnder).toFixed(2)} miles{" "}
+                {Math.round(Math.abs(milesOverUnder))} miles{" "}
                 {milesOverUnder > 0 ? "over" : "under"}
               </Typography>
             </CardContent>
